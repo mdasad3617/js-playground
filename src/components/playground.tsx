@@ -14,35 +14,170 @@ const Playground: React.FC = () => {
       allowNonTsExtensions: true,
     });
 
+    // Register JavaScript Code Snippets
     monaco.languages.registerCompletionItemProvider('javascript', {
-      provideCompletionItems: (model) => {
+      provideCompletionItems: (model, position) => {
         const suggestions = [
           {
-            label: 'for-loop',
-            kind: monaco.languages.CompletionItemKind.Snippet,
-            insertText: [
-              'for (let ${1:i} = 0; ${1:i} < ${2:array}.length; ${1:i}++) {',
-              '\tconst ${3:element} = ${2:array}[${1:i}];',
-              '\t$0',
-              '}'
-            ].join('\n'),
-            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-            detail: 'For Loop',
-            documentation: 'A basic for loop',
-            range: model.getFullModelRange(),
-          },
-          {
             label: 'console.log',
-            kind: monaco.languages.CompletionItemKind.Snippet,
+            kind: monaco.languages.CompletionItemKind.Function,
             insertText: 'console.log(${1:message});',
             insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
             detail: 'Console Log',
-            documentation: 'Log output to the console',
-            range: model.getFullModelRange(),
+            documentation: 'Logs output to the console',
+            range: {
+              startLineNumber: position.lineNumber,
+              startColumn: position.column,
+              endLineNumber: position.lineNumber,
+              endColumn: position.column + 1,
+            },
+          },
+          {
+            label: 'forEach',
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: '${1:array}.forEach(${2:item} => {\n\t$0\n});',
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: 'Array forEach Loop',
+            documentation: 'Iterate through an array with forEach',
+            range: {
+              startLineNumber: position.lineNumber,
+              startColumn: position.column,
+              endLineNumber: position.lineNumber,
+              endColumn: position.column + 1,
+            },
+          },
+          {
+            label: 'async-await',
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: [
+              'async function ${1:fetchData}() {',
+              '\ttry {',
+              '\t\tconst response = await fetch(${2:\'https://api.example.com\'});',
+              '\t\tconst data = await response.json();',
+              '\t\tconsole.log(data);',
+              '\t} catch (error) {',
+              '\t\tconsole.error(error);',
+              '\t}',
+              '}'
+            ].join('\n'),
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: 'Async Function',
+            documentation: 'Creates an asynchronous function',
+            range: {
+              startLineNumber: position.lineNumber,
+              startColumn: position.column,
+              endLineNumber: position.lineNumber,
+              endColumn: position.column + 1,
+            },
+          },
+          {
+            label: 'fetch',
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: 'fetch(${1:\'https://api.example.com\'})\n\t.then(response => response.json())\n\t.then(data => console.log(data))\n\t.catch(error => console.error(error));',
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: 'Fetch API',
+            documentation: 'Performs an HTTP request',
+            range: {
+              startLineNumber: position.lineNumber,
+              startColumn: position.column,
+              endLineNumber: position.lineNumber,
+              endColumn: position.column + 1,
+            },
+          },
+          {
+            label: 'setTimeout',
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: 'setTimeout(() => {\n\t$0\n}, ${1:1000});',
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: 'setTimeout Function',
+            documentation: 'Executes code after a delay',
+            range: {
+              startLineNumber: position.lineNumber,
+              startColumn: position.column,
+              endLineNumber: position.lineNumber,
+              endColumn: position.column + 1,
+            },
           },
         ];
+
+        const currentText = model.getValueInRange({
+          startLineNumber: position.lineNumber,
+          startColumn: 1,
+          endLineNumber: position.lineNumber,
+          endColumn: position.column,
+        });
+
+        console.log(currentText);
+
         return { suggestions };
-      }
+      },
+    });
+
+    // Enable Advanced IntelliSense
+    monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+      noSemanticValidation: false,
+      noSyntaxValidation: false,
+    });
+
+    // Enable Automatic Variable Suggestions
+    monaco.languages.registerCompletionItemProvider('javascript', {
+      triggerCharacters: ['.', '"', "'", '`', '/', '@'],
+      provideCompletionItems: (model, position) => {
+        const textUntilPosition = model.getValueInRange({
+          startLineNumber: 1,
+          startColumn: 1,
+          endLineNumber: position.lineNumber,
+          endColumn: position.column,
+        });
+
+        // Suggest common built-in objects
+        if (textUntilPosition.endsWith('.')) {
+          return {
+            suggestions: [
+              {
+                label: 'map',
+                kind: monaco.languages.CompletionItemKind.Method,
+                insertText: 'map(${1:item} => ${2:item})',
+                insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                detail: 'Array Map Method',
+                range: {
+                  startLineNumber: position.lineNumber,
+                  startColumn: position.column,
+                  endLineNumber: position.lineNumber,
+                  endColumn: position.column + 1,
+                },
+              },
+              {
+                label: 'filter',
+                kind: monaco.languages.CompletionItemKind.Method,
+                insertText: 'filter(${1:item} => ${2:condition})',
+                insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                detail: 'Array Filter Method',
+                range: {
+                  startLineNumber: position.lineNumber,
+                  startColumn: position.column,
+                  endLineNumber: position.lineNumber,
+                  endColumn: position.column + 1,
+                },
+              },
+              {
+                label: 'reduce',
+                kind: monaco.languages.CompletionItemKind.Method,
+                insertText: 'reduce((acc, curr) => acc + curr, 0)',
+                insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                detail: 'Array Reduce Method',
+                range: {
+                  startLineNumber: position.lineNumber,
+                  startColumn: position.column,
+                  endLineNumber: position.lineNumber,
+                  endColumn: position.column + 1,
+                },
+              },
+            ],
+          };
+        }
+        return { suggestions: [] };
+      },
     });
   }, []);
 
@@ -78,57 +213,35 @@ const Playground: React.FC = () => {
   }, [runCode]);
 
   return (
-    <div style={{ 
-      fontFamily: 'Arial, sans-serif', 
-      margin: '20px', 
-      backgroundColor: '#e8f5e9', 
-      color: '#2e7d32', 
-      display: 'flex', 
-      flexDirection: 'column', 
-      alignItems: 'flex-start', 
-      justifyContent: 'center', 
-      height: '100vh', 
-      padding: '20px', 
-      boxSizing: 'border-box' 
-    }}>
-      <h1 style={{ marginBottom: '20px' }}>js-playground</h1>
+    <div style={{ padding: '20px', backgroundColor: '#E9FCE9', height: '100vh', border: '2px solid lightgreen' }}>
+      <h1>JavaScript Playground</h1>
       <MonacoEditor
         height="60vh"
         language={language}
-        theme="vs-light"
+        theme="vs"
         value={editorValue}
         onChange={setEditorValue}
         options={{
           selectOnLineNumbers: true,
           automaticLayout: true,
-          quickSuggestions: true, 
-          suggestOnTriggerCharacters: true, 
+          quickSuggestions: true,
+          suggestOnTriggerCharacters: true,
         }}
       />
       <br />
-      <button onClick={runCode} style={{ 
-        padding: '10px 20px', 
-        fontSize: '16px', 
-        backgroundColor: '#2e7d32', 
-        color: '#fff', 
-        border: 'none', 
-        borderRadius: '5px', 
-        cursor: 'pointer', 
-        marginLeft: '0' 
-      }}>
+      <button onClick={runCode} style={{ padding: '10px', backgroundColor: '#28a745', color: '#fff', borderRadius: '5px' }}>
         ▶ Run Code
       </button>
       <Output output={output} />
-      
       <footer style={{ 
         textAlign: 'center', 
         marginTop: '20px', 
         fontSize: '14px', 
-        color: '#2e7d32' 
       }}>
         Made by mdasad
       </footer>
     </div>
+    
   );
 };
 

@@ -8,7 +8,7 @@ const Output: React.FC<OutputProps> = ({ output }) => {
       backgroundColor: '#fff', 
       border: '1px solid #2e7d32', 
       padding: '20px', 
-      width: '100%', 
+      width: '97%', 
       marginTop: '20px', 
       borderRadius: '5px' 
     }}>
